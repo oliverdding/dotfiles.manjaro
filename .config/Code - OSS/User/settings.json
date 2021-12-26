@@ -1,7 +1,7 @@
 {
   "window.titleBarStyle": "custom",
   "files.autoSave": "onWindowChange",
-  "workbench.colorTheme": "Nord",
+  "workbench.colorTheme": "Gruvbox Dark Hard",
   "workbench.iconTheme": "material-icon-theme",
   "workbench.sideBar.location": "right",
   "update.mode": "manual",

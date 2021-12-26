@@ -37,6 +37,7 @@ systemctl_user_enable() {
 }
 
 echo -e "\n### copying configurations"
+copy "etc/containers/registries.conf"
 copy "etc/pacman.d/hooks/50-dash-as-sh.hook"
 copy "etc/profile.d/20-clean-home.sh"
 copy "etc/profile.d/home-cargo-bin.sh"
