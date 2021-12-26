@@ -49,7 +49,6 @@ mkdir -p "$HOME"/.local/share/icons
 mkdir -p "$HOME"/.local/share/ivy2
 mkdir -p "$HOME"/.local/share/pass
 mkdir -p "$HOME"/.local/share/themes
-mkdir -p "$HOME"/.local/share/sbt
 mkdir -p "$HOME"/.local/share/git
 touch $HOME/.local/share/git/git-credentials
 
@@ -81,7 +80,6 @@ link ".local/bin/gdb"
 link ".local/bin/gpg"
 link ".local/bin/gpg" ".local/bin/gpg2"
 link ".local/bin/ls"
-link ".local/bin/sbt"
 link ".local/bin/sqlite3"
 
 echo "############################"
