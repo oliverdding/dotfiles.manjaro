@@ -38,6 +38,10 @@ systemctl_user_enable() {
 
 echo -e "\n### copying configurations"
 copy "etc/pacman.d/hooks/50-dash-as-sh.hook"
+copy "etc/profile.d/20-clean-home.sh"
+copy "etc/profile.d/home-cargo-bin.sh"
+copy "etc/profile.d/program.sh"
+copy "etc/profile.d/10-xdg.sh"
 copy "etc/sudoers.d/override"
 copy "etc/sysctl.d/50-default.conf"
 
@@ -48,22 +52,20 @@ for GROUP in wheel network video input; do
 done
 
 echo -e "\n### installing packages"
-pacman -Sy --needed --noconfirm git git-delta starship zoxide fzf exa bash-completion ripgrep neovim pigz podman podman-docker podman-dnsname
+pacman -Sy --needed --noconfirm dash git fakeroot git-delta starship zoxide fzf exa bash-completion ripgrep neovim pigz podman podman-docker podman-compose podman-dnsname
+
+ln -sfT dash /usr/bin/sh
 
 pacman -Sy --needed --noconfirm helm kubectl kubectx
 pacman -Sy --needed --noconfirm gcc gdb cmake clang lldb go python python-setuptools python-pip python-pipenv
 pacman -Sy --needed --noconfirm jdk-openjdk jre-openjdk openjdk-doc openjdk-src scala scala-sources scala-docs gradle gradle-src gradle-doc sbt
-pacman -Sy --needed --noconfirm cargo-flamegraph cargo-bloat cargo-edit rustup
+pacman -Sy --needed --noconfirm cargo-flamegraph cargo-bloat cargo-edit rust
 pacman -Sy --needed --noconfirm bandwhich bottom bat dua-cli gitui gping hexyl oha onefetch xplr procs miniserve
 pacman -Sy --needed --noconfirm wqy-microhei wqy-bitmapfont wqy-zenhei adobe-source-han-sans-cn-fonts adobe-source-han-serif-cn-fonts adobe-source-code-pro-fonts adobe-source-sans-pro-fonts adobe-source-serif-pro-fonts noto-fonts noto-fonts-cjk
 
-RUSTUP_HOME=~/.local/share/rustup CARGO_HOME=~/.local/share/cargo bash -c 'rustup toolchain add nightly-x86_64-unknown-linux-gnu'
-RUSTUP_HOME=~/.local/share/rustup CARGO_HOME=~/.local/share/cargo bash -c 'rustup default nightly-x86_64-unknown-linux-gnu'
-RUSTUP_HOME=~/.local/share/rustup CARGO_HOME=~/.local/share/cargo bash -c 'rustup component add llvm-tools-preview clippy rust-analyzer-preview rust-src'
-
 echo -e "\n### configuring podman with rootless access"
 touch /etc/subuid /etc/subgid
-usermod --add-subuids 100000-165535 --add-subgids 100000-165535 $USERNAME
+usermod --add-subuids 100000-165535 --add-subgids 100000-165535 charmer
 podman system migrate
 
 echo -e "\n### enabling useful systemd-module"
@@ -71,11 +73,11 @@ systemctl_user_enable "podman.service"
 
 echo -e "\n### adding archlinuxcn"
 echo -e '[archlinuxcn]\nServer = https://mirrors.cloud.tencent.com/archlinuxcn/$arch' >>/mnt/etc/pacman.conf
-install_package archlinuxcn-keyring
-rm -fr /mnt/etc/pacman.d/gnupg
-arch-chroot /mnt pacman-key --init
-arch-chroot /mnt pacman-key --populate archlinux
-arch-chroot /mnt pacman-key --populate archlinuxcn
+pacman -Sy --needed --noconfirm archlinuxcn-keyring
+rm -fr /etc/pacman.d/gnupg
+pacman-key --init
+pacman-key --populate archlinux
+pacman-key --populate archlinuxcn
 
 pacman -Sy --needed --noconfirm paru
 pacman -Sy --needed --noconfirm ttf-nerd-fonts-symbols-mono noto-fonts-emoji powerline-fonts nerd-fonts-fira-code nerd-fonts-jetbrains-mono nerd-fonts-source-code-pro nerd-fonts-ubuntu-mono

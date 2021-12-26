@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/usr/bin/bash
 
-set -uo pipefail
+set -o pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 exec 1> >(tee "stdout.log")
@@ -66,7 +66,8 @@ link ".bash_profile"
 link ".bashrc"
 
 link ".config/bottom"
-link ".config/environment.d"
+link ".config/Code - OSS/User/settings.json"
+link ".config/docker/config.json"
 link ".config/gdb/init"
 link ".config/git/common"
 link ".config/git/config"
@@ -75,7 +76,6 @@ link ".config/k9s/skin.yml"
 link ".config/npm"
 link ".config/nvim"
 link ".config/starship.toml"
-link ".config/wgetrc"
 
 link ".local/bin/gdb"
 link ".local/bin/gpg"
@@ -83,7 +83,6 @@ link ".local/bin/gpg" ".local/bin/gpg2"
 link ".local/bin/ls"
 link ".local/bin/sbt"
 link ".local/bin/sqlite3"
-link ".local/bin/wget"
 
 echo "############################"
 echo "configure others dotfiles..."
