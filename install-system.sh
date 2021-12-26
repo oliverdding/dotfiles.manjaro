@@ -26,34 +26,56 @@ copy() {
     echo "$dest_file <= $orig_file"
 }
 
+systemctl_enable() {
+    echo "systemctl enable "$1""
+    systemctl enable "$1"
+}
+
+systemctl_user_enable() {
+    echo "systemctl user enable "$1""
+    sudo -u charmer bash -c "systemctl enable --user "$1""
+}
+
 echo -e "\n### copying configurations"
 copy "etc/pacman.d/hooks/50-dash-as-sh.hook"
 copy "etc/sudoers.d/override"
+copy "etc/sysctl.d/50-default.conf"
 
 echo -e "\n### configuring user"
-for GROUP in wheel network video input docker; do
+for GROUP in wheel network video input; do
     groupadd -rf "$GROUP"
-    gpasswd -a "$USER" "$GROUP"
+    gpasswd -a charmer "$GROUP"
 done
 
 echo -e "\n### installing packages"
-pacman -Sy --needed --noconfirm dash git starship git-delta exa bash-completion ripgrep neovim docker docker-compose pigz
+pacman -Sy --needed --noconfirm git git-delta starship zoxide fzf exa bash-completion ripgrep neovim pigz podman podman-docker podman-dnsname
+
 pacman -Sy --needed --noconfirm helm kubectl kubectx
-pacman -Sy --needed --noconfirm clang gcc gdb lldb go python python-setuptools python-pip python-pipenv
-pacman -Sy --needed --noconfirm bandwhich bottom dua-cli gitui gping hexyl oha onefetch xplr procs miniserve
-pacman -Sy --needed --noconfirm cargo-flamegraph rustup
+pacman -Sy --needed --noconfirm gcc gdb cmake clang lldb go python python-setuptools python-pip python-pipenv
+pacman -Sy --needed --noconfirm jdk-openjdk jre-openjdk openjdk-doc openjdk-src scala scala-sources scala-docs gradle gradle-src gradle-doc sbt
+pacman -Sy --needed --noconfirm cargo-flamegraph cargo-bloat cargo-edit rustup
+pacman -Sy --needed --noconfirm bandwhich bottom bat dua-cli gitui gping hexyl oha onefetch xplr procs miniserve
 pacman -Sy --needed --noconfirm wqy-microhei wqy-bitmapfont wqy-zenhei adobe-source-han-sans-cn-fonts adobe-source-han-serif-cn-fonts adobe-source-code-pro-fonts adobe-source-sans-pro-fonts adobe-source-serif-pro-fonts noto-fonts noto-fonts-cjk
 
-rustup toolchain add nightly-x86_64-unknown-linux-gnu
-rustup default nightly-x86_64-unknown-linux-gnu
-rustup component add llvm-tools-preview-x86_64-unknown-linux-gnu clippy-x86_64-unknown-linux-gnu rust-analyzer-preview-x86_64-unknown-linux-gnu rust-src
+RUSTUP_HOME=~/.local/share/rustup CARGO_HOME=~/.local/share/cargo bash -c 'rustup toolchain add nightly-x86_64-unknown-linux-gnu'
+RUSTUP_HOME=~/.local/share/rustup CARGO_HOME=~/.local/share/cargo bash -c 'rustup default nightly-x86_64-unknown-linux-gnu'
+RUSTUP_HOME=~/.local/share/rustup CARGO_HOME=~/.local/share/cargo bash -c 'rustup component add llvm-tools-preview clippy rust-analyzer-preview rust-src'
+
+echo -e "\n### configuring podman with rootless access"
+touch /etc/subuid /etc/subgid
+usermod --add-subuids 100000-165535 --add-subgids 100000-165535 $USERNAME
+podman system migrate
+
+echo -e "\n### enabling useful systemd-module"
+systemctl_user_enable "podman.service"
 
 echo -e "\n### adding archlinuxcn"
-echo -e '[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/$arch' >>/mnt/etc/pacman.conf
+echo -e '[archlinuxcn]\nServer = https://mirrors.cloud.tencent.com/archlinuxcn/$arch' >>/mnt/etc/pacman.conf
 install_package archlinuxcn-keyring
 rm -fr /mnt/etc/pacman.d/gnupg
 arch-chroot /mnt pacman-key --init
 arch-chroot /mnt pacman-key --populate archlinux
 arch-chroot /mnt pacman-key --populate archlinuxcn
 
+pacman -Sy --needed --noconfirm paru
 pacman -Sy --needed --noconfirm ttf-nerd-fonts-symbols-mono noto-fonts-emoji powerline-fonts nerd-fonts-fira-code nerd-fonts-jetbrains-mono nerd-fonts-source-code-pro nerd-fonts-ubuntu-mono

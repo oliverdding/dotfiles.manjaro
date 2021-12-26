@@ -56,4 +56,7 @@
 [remote "origin"]
 	fetch = +refs/pull/*/head:refs/remotes/origin/pr/*
 
+[credential]
+	helper = store --file ~/.config/git/git-credentials
+
 # vim:ft=ini
